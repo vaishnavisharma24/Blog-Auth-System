@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Dashboard - Manage your posts and explore the latest updates."
+    />
+    <meta name="keywords" content="dashboard, posts, manage, blog" />
+    <title>Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- Font Awesome for icons -->
+    <style>
+      /* Global styles */
+      body {
+        font-family: "Open Sans", sans-serif;
+        background-color: #f8f9fa;
+        color: #495057;
+        margin: 0;
+        padding: 0;
+        transition: margin-left 0.3s;
+      }
+
+      /* Sidebar styles */
+      .sidebar {
+        height: 100%;
+        width: 250px;
+        position: fixed;
+        top: 0;
+        left: -250px; /* Initially hidden */
+        background-color: #343a40;
+        color: white;
+        transition: left 0.3s;
+        z-index: 1000;
+        padding-top: 20px;
+      }
+
+      .sidebar a {
+        color: white;
+        padding: 12px 15px;
+        text-decoration: none;
+        display: block;
+        font-size: 18px;
+        border-bottom: 1px solid #495057;
+        transition: background-color 0.3s;
+      }
+
+      .sidebar a.active {
+        background-color: #007bff;
+      }
+
+      .sidebar a:hover {
+        background-color: #0056b3;
+      }
+
+      .sidebar .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 30px;
+        color: white;
+        cursor: pointer;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .sidebar-toggle {
+        font-size: 30px;
+        color: #495057;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        cursor: pointer;
+        z-index: 1001;
+      }
+
+      .content {
+        margin-left: 0;
+        transition: margin-left 0.3s;
+        padding: 20px;
+      }
+
+      .content.active {
+        margin-left: 250px; /* Content moves right when sidebar is open */
+      }
+
+      /* Header and page title */
+      h1 {
+        font-size: 2.5rem;
+        color: #343a40;
+        margin-bottom: 20px;
+      }
+
+      /* Button styling */
+      .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 5px;
+      }
+
+      .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+      }
+
+      /* Card styles */
+      .card {
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s, box-shadow 0.3s; /* Add transition for smooth effect */
+        border: none; /* Remove default border */
+        border-radius: 10px; /* Rounded corners */
+        overflow: hidden; /* Ensure content doesn't overflow */
+      }
+
+      .card:hover {
+        transform: translateY(-5px); /* Lift effect on hover */
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
+      }
+
+      .card-img-top {
+        object-fit: cover;
+        height: 200px;
+        transition: transform 0.3s; /* Add transition for image scaling */
+      }
+
+      .card:hover .card-img-top {
+        transform: scale(1.05); /* Slightly scale the image on hover */
+      }
+
+      .card-body {
+        padding: 20px; /* Add padding for better spacing */
+      }
+
+      .card-title {
+        font-size: 1.5rem; /* Increase title size */
+        margin-bottom: 10px; /* Space below title */
+      }
+
+      .card-text {
+        font-size: 1rem; /* Set a base font size */
+        color: #6c757d; /* Change text color for better readability */
+      }
+
+      .card-footer {
+        background-color: #f8f9fa; /* Light background for footer */
+        border-top: 1px solid #dee2e6; /* Subtle border on top */
+        padding: 10px; /* Padding for footer */
+      }
+
+      .card-footer a {
+        margin-right: 5px; /* Space between buttons */
+        transition: background-color 0.3s; /* Transition for button hover */
+      }
+
+      .card-footer a:hover {
+        background-color: #007bff; /* Change background on hover */
+        color: white; /* Change text color on hover */
+      }
+
+      /* Pagination styles */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        padding: 20px 0;
+        list-style: none;
+      }
+
+      .pagination li {
+        margin: 0 5px;
+      }
+
+      .pagination li a {
+        display: block;
+        padding: 8px 16px;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        color: #007bff;
+        text-decoration: none;
+        transition: background-color 0.3s;
+      }
+
+      .pagination li a:hover {
+        background-color: #e9ecef;
+      }
+
+      .pagination li.active a {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+      }
+
+      .pagination li.disabled a {
+        color: #6c757d;
+        pointer-events: none;
+        cursor: not-allowed;
+      }
+
+      /* Media query for smaller screens */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 200px;
+        }
+
+        .sidebar a {
+          font-size: 16px;
+          padding: 10px;
+        }
+
+        .content.active {
+          margin-left: 200px;
+        }
+
+        /* Cards stack on smaller screens */
+        .card-img-top {
+          height: 180px;
+        }
+
+        .card-body {
+          padding: 15px;
+        }
+
+        .card-title {
+          font-size: 1.25rem;
+        }
+
+        .pagination {
+          font-size: 14px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .sidebar {
+          width: 180px;
+        }
+
+        .sidebar-toggle {
+          left: 10px;
+        }
+
+        .content.active {
+          margin-left: 180px;
+        }
+
+        .card-img-top {
+          height: 150px;
+        }
+
+        .card-body {
+          padding: 10px;
+        }
+
+        .card-title {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <% const defaultImage =
+    "https://soliloquywp.com/wp-content/uploads/2016/08/How-to-Set-a-Default-Featured-Image-in-WordPress.png";
+    %>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <span class="close-btn" id="close-btn">&times;</span>
+      <a href="/" class="text-center"> <i class="fas fa-blog"></i> Blog </a>
+      <a href="/posts" class="active">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <% if (typeof user != 'undefined') { %>
+      <a href="/users/profile"> <i class="fas fa-user"></i> Profile </a>
+      <a href="/users/logout"> <i class="fas fa-sign-out-alt"></i> Logout </a>
+      <% } else { %>
+      <a href="/users/register"> <i class="fas fa-user-plus"></i> Register </a>
+      <a href="/users/login"> <i class="fas fa-sign-in-alt"></i> Login </a>
+      <% } %>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Sidebar toggle button -->
+      <span class="sidebar-toggle" id="sidebar-toggle">&#9776;</span>
+
+      <div class="container mt-5">
+        <h1>Dashboard</h1>
+        <a href="/posts/addpost" class="btn btn-primary mb-3">
+          <i class="fas fa-plus-circle"></i> Add Post
+        </a>
+        <% if (posts.length > 0) { %>
+        <div class="row">
+          <% posts.forEach(function(post) { %>
+          <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+              <img
+                class="card-img-top"
+                src="<%= post.image || defaultImage %>"
+                alt="Post image"
+                loading="lazy"
+              />
+              <div class="card-body">
+                <h5 class="card-title"><%= post.title %></h5>
+                <p class="card-text">
+                  <%= post.caption %>
+                  <a href="/posts/<%= post.id %>" class="read-more"
+                    >Read more</a
+                  >
+                </p>
+              </div>
+              <div
+                class="card-footer d-flex justify-content-between align-items-center"
+              >
+                <div class="text-muted">
+                  <!-- Posted by information -->
+                  Posted by: <%= post.username || "Unknown" %>
+                </div>
+                <div>
+                  <!-- Edit and Delete icons -->
+                  <a
+                    href="/posts/edit/<%= post.id %>"
+                    class="text-dark me-3"
+                    title="Edit"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <a
+                    href="/posts/delete/<%= post.id %>"
+                    class="text-dark"
+                    title="Delete"
+                  >
+                    <i class="fas fa-trash-alt"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center">
+            <% if (currentPage > 1) { %>
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="?page=<%= currentPage - 1 %>"
+                aria-label="Previous"
+                >Previous</a
+              >
+            </li>
+            <% } %> <% for (let i = 1; i <= totalPages; i++) { %>
+            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+            </li>
+            <% } %> <% if (currentPage < totalPages) { %>
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="?page=<%= currentPage + 1 %>"
+                aria-label="Next"
+                >Next</a
+              >
+            </li>
+            <% } %>
+          </ul>
+        </nav>
+        <% } else { %>
+        <p>No posts available.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5">
+      <div class="container py-4">
+        <div class="row">
+          <!-- About Section -->
+          <div class="col-md-4">
+            <h5>About</h5>
+            <p>
+              Manage your posts, explore updates, and stay connected with the
+              latest features of our platform.
+            </p>
+          </div>
+
+          <!-- Quick Links -->
+          <div class="col-md-4">
+            <h5 class="text-uppercase">Quick Links</h5>
+            <ul class="list-unstyled">
+              <li>
+                <a href="/" class="text-white text-decoration-none">Home</a>
+              </li>
+              <li>
+                <a href="/posts" class="text-white text-decoration-none"
+                  >Dashboard</a
+                >
+              </li>
+              <li>
+                <a href="/posts/addpost" class="text-white text-decoration-none"
+                  >Add Post</a
+                >
+              </li>
+              <% if (typeof user != "undefined") { %>
+              <li>
+                <a href="/users/profile" class="text-white text-decoration-none"
+                  >Profile</a
+                >
+              </li>
+              <li>
+                <a href="/users/logout" class="text-white text-decoration-none"
+                  >Logout</a
+                >
+              </li>
+              <% } else { %>
+              <li>
+                <a
+                  href="/users/register"
+                  class="text-white text-decoration-none"
+                  >Register</a
+                >
+              </li>
+              <li>
+                <a href="/users/login" class="text-white text-decoration-none"
+                  >Login</a
+                >
+              </li>
+              <% } %>
+            </ul>
+          </div>
+
+          <!-- Social Media -->
+          <div class="col-md-4">
+            <h5>Follow Us</h5>
+            <a
+              href="https://facebook.com"
+              target="_blank"
+              class="text-white me-3"
+              ><i class="fab fa-facebook fa-lg"></i
+            ></a>
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              class="text-white me-3"
+              ><i class="fab fa-twitter fa-lg"></i
+            ></a>
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              class="text-white me-3"
+              ><i class="fab fa-instagram fa-lg"></i
+            ></a>
+            <a href="https://linkedin.com" target="_blank" class="text-white"
+              ><i class="fab fa-linkedin fa-lg"></i
+            ></a>
+          </div>
+        </div>
+        <hr class="bg-light" />
+        <div class="text-center">
+          <p class="mb-0">
+            &copy; <%= new Date().getFullYear() %> Blog. All Rights Reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Sidebar toggle functionality
+      const sidebar = document.getElementById("sidebar");
+      const sidebarToggle = document.getElementById("sidebar-toggle");
+      const closeBtn = document.getElementById("close-btn");
+
+      sidebarToggle.addEventListener("click", () => {
+        sidebar.classList.toggle("active");
+        document.querySelector(".content").classList.toggle("active");
+      });
+
+      closeBtn.addEventListener("click", () => {
+        sidebar.classList.remove("active");
+        document.querySelector(".content").classList.remove("active");
+      });
+    </script>
+  </body>
+</html>

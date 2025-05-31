@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Add Post</title>
+    <meta
+      name="description"
+      content="Add a new post to the blog. Share your thoughts and ideas."
+    />
+    <meta name="keywords" content="add post, blog, create post, new post" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="/richtexteditor/rte_theme_default.css" />
+    <style>
+      /* Flash message styling */
+      .flash-message {
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      .flash-message.alert-success {
+        color: #28a745; /* Green for success */
+      }
+      .flash-message.alert-danger {
+        color: #dc3545; /* Red for error */
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="/">Blog</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/posts">Dashboard</a>
+          </li>
+          <% if (typeof user != 'undefined') { %>
+          <li class="nav-item dropdown">
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              <i class="fas fa-user-circle"></i> <%= user.username %>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="/users/profile">Profile</a>
+              <a class="dropdown-item" href="/users/logout">Logout</a>
+            </div>
+          </li>
+          <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/users/register">Register</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/users/login">Login</a>
+          </li>
+          <% } %>
+        </ul>
+      </div>
+    </nav>
+    <div class="container mt-5">
+      <h1>Add New Post</h1>
+
+      <!-- Flash Messages -->
+      <% if (error_msg) { %>
+      <p class="flash-message alert-danger"><%= error_msg %></p>
+      <% } %> <% if (success_msg) { %>
+      <p class="flash-message alert-success"><%= success_msg %></p>
+      <% } %>
+
+      <form action="/posts/addpost" method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input
+            type="text"
+            class="form-control"
+            id="title"
+            name="title"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="caption">Caption</label>
+          <input
+            type="text"
+            class="form-control"
+            id="caption"
+            name="caption"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="content">Content</label>
+          <textarea
+            class="form-control"
+            id="div_editor1"
+            name="content"
+            required
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label for="image">Upload Image</label>
+          <input
+            type="file"
+            class="form-control"
+            id="image"
+            name="image"
+            accept="image/*"
+          />
+        </div>
+        <button type="submit" class="btn btn-primary">Add Post</button>
+      </form>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="/richtexteditor/rte.js"></script>
+    <script src="/richtexteditor/plugins/all_plugins.js"></script>
+    <script>
+      // Rich Text Editor Configuration
+      var config = {};
+      config.file_upload_handler = function (file, callback) {
+        var uploadhandlerpath = "/posts/upload"; // Backend route for image upload
+        var formData = new FormData();
+        formData.append("file", file);
+
+        var xh = new XMLHttpRequest();
+        xh.open("POST", uploadhandlerpath, true);
+
+        xh.onload = function () {
+          if (xh.status === 200 && xh.responseText.startsWith("READY:")) {
+            callback(xh.responseText.substring(6)); // Return the image path
+          } else {
+            callback(null, "http-error-" + xh.responseText);
+          }
+        };
+
+        xh.onerror = function () {
+          callback(null, "http-error-" + xh.status);
+        };
+
+        xh.send(formData);
+      };
+
+      var editor1 = new RichTextEditor("#div_editor1", config);
+    </script>
+  </body>
+</html>
